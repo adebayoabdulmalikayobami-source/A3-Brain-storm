@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>A3 Brain Storm</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1B1F3B">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="A3 Brain Storm">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14182B; --navy:#1B1F3B; --navy-2:#242A52; --navy-3:#2D3466;
+    --paper:#F6F1E4; --paper-dim:#EAE3D0;
+    --gold:#F2A93B; --gold-dim:#C98A2C;
+    --cyan:#4FD1C5; --red:#E8735F;
+    --slate:#8388AC; --line:rgba(246,241,228,0.14);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--navy); color:var(--paper);
+    font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased;
+    overflow:hidden; position:relative;
+  }
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--paper); letter-spacing:-0.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  button{font-family:inherit; cursor:pointer;}
+  input{font-family:inherit;}
+  ::selection{background:var(--gold); color:var(--navy);}
+  .app-frame{
+    max-width:460px; height:100vh; margin:0 auto; position:relative;
+    background:var(--navy); overflow:hidden;
+    box-shadow:0 0 60px rgba(0,0,0,0.5);
+  }
+  .screen{
+    position:absolute; inset:0; display:none; flex-direction:column;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+  }
+  .screen.active{display:flex;}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important; transition-duration:.01ms !important;}}
+
+  /* ===================== SPLASH ===================== */
+  #screen-splash{
+    justify-content:center; align-items:center; text-align:center;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(242,169,59,0.10), transparent 55%),
+      radial-gradient(circle at 80% 85%, rgba(79,209,197,0.10), transparent 50%),
+      var(--navy);
+    position:relative;
+  }
+  .splash-seal{
+    width:64px; height:64px; border-radius:50%; border:1.5px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--gold); font-size:1.1rem;
+    margin-bottom:26px; opacity:0; animation:fadeUp .7s ease forwards;
+  }
+  .splash-pre{
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; letter-spacing:0.25em;
+    text-transform:uppercase; color:var(--slate);
+    opacity:0; animation:fadeUp .7s ease forwards; animation-delay:.25s;
+    margin-bottom:10px;
+  }
+  .splash-title{
+    font-size:1.9rem; line-height:1.15; font-weight:700; padding:0 30px;
+    opacity:0; animation:fadeUp .8s ease forwards; animation-delay:.5s;
+  }
+  .splash-title em{color:var(--gold); font-style:italic;}
+  .splash-motto{
+    margin-top:18px; font-family:'JetBrains Mono',monospace; font-size:0.78rem;
+    letter-spacing:0.1em; color:var(--cyan);
+    opacity:0; animation:fadeUp .8s ease forwards; animation-delay:1s;
+  }
+  @keyframes fadeUp{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+  .splash-bar-track{
+    position:absolute; bottom:56px; left:50%; transform:translateX(-50%);
+    width:180px; height:3px; background:rgba(246,241,228,0.12); border-radius:10px; overflow:hidden;
+  }
+  .splash-bar-fill{
+    height:100%; width:0%; background:var(--gold); border-radius:10px;
+    animation:fillBar 3.2s ease forwards;
+  }
+  @keyframes fillBar{to{width:100%;}}
+  .splash-tap{
+    position:absolute; bottom:20px; font-size:0.72rem; color:var(--slate);
+    opacity:0; animation:fadeUp .6s ease forwards; animation-delay:3.4s;
+  }
+
+  /* ===================== AUTH SCREENS ===================== */
+  .auth-wrap{padding:40px 26px 30px; flex:1; display:flex; flex-direction:column;}
+  .auth-top{margin-bottom:34px;}
+  .auth-top .seal{
+    width:40px; height:40px; border-radius:50%; border:1.5px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--gold); font-size:0.8rem;
+    margin-bottom:20px;
+  }
+  .auth-top h2{font-size:1.5rem; margin-bottom:8px;}
+  .auth-top p{font-size:0.88rem; color:var(--slate); line-height:1.5;}
+  .btn-google{
+    width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
+    background:var(--paper); color:var(--ink); border:none; border-radius:10px;
+    padding:14px; font-weight:700; font-size:0.92rem; margin-bottom:18px;
+  }
+  .divider{
+    display:flex; align-items:center; gap:12px; margin:6px 0 20px;
+    font-size:0.75rem; color:var(--slate); text-transform:uppercase; letter-spacing:0.06em;
+  }
+  .divider::before, .divider::after{content:""; flex:1; height:1px; background:var(--line);}
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block; font-size:0.78rem; color:var(--slate); margin-bottom:7px;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .field-input-wrap{position:relative;}
+  .field input{
+    width:100%; background:var(--navy-2); border:1px solid var(--line); color:var(--paper);
+    padding:13px 44px 13px 14px; border-radius:10px; font-size:0.92rem;
+  }
+  .field input:focus{outline:none; border-color:var(--cyan);}
+  .field-hint{font-size:0.72rem; color:var(--slate); margin-top:6px;}
+  .toggle-eye{
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    background:none; border:none; color:var(--slate); font-size:0.72rem; font-family:'JetBrains Mono',monospace;
+  }
+  .btn-primary{
+    width:100%; background:var(--gold); color:var(--navy); border:none; border-radius:10px;
+    padding:14px; font-weight:700; font-size:0.94rem; margin-top:6px;
+  }
+  .auth-switch{margin-top:20px; text-align:center; font-size:0.85rem; color:var(--slate);}
+  .auth-switch a{color:var(--cyan); font-weight:600;}
+
+  /* PIN screen */
+  .pin-wrap{flex:1; display:flex; flex-direction:column; align-items:center; padding:50px 26px 30px;}
+  .pin-wrap h2{font-size:1.35rem; margin-bottom:8px;}
+  .pin-wrap p{font-size:0.85rem; color:var(--slate); margin-bottom:34px; text-align:center;}
+  .pin-dots{display:flex; gap:16px; margin-bottom:44px;}
+  .pin-dot{
+    width:16px; height:16px; border-radius:50%; border:1.5px solid var(--slate);
+    transition:background .15s, border-color .15s;
+  }
+  .pin-dot.filled{background:var(--gold); border-color:var(--gold);}
+  .pin-pad{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; width:100%; max-width:280px;}
+  .pin-key{
+    aspect-ratio:1; border-radius:50%; background:var(--navy-2); border:1px solid var(--line);
+    color:var(--paper); font-size:1.2rem; font-weight:600; display:flex; align-items:center; justify-content:center;
+  }
+  .pin-key:active{background:var(--navy-3);}
+  .pin-key.ghost{background:none; border:none; color:var(--slate); font-size:0.85rem;}
+
+  /* ===================== APP SHELL ===================== */
+  #screen-app{flex-direction:row;}
+  .sidebar{
+    position:absolute; inset:0 auto 0 0; width:78%; max-width:300px;
+    background:var(--ink); border-right:1px solid var(--line);
+    transform:translateX(-105%); transition:transform .28s ease;
+    z-index:40; display:flex; flex-direction:column; overflow-y:auto;
+  }
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-scrim{
+    position:absolute; inset:0; background:rgba(0,0,0,0.5); z-index:35;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .sidebar-scrim.show{opacity:1; pointer-events:auto;}
+  .sidebar-head{padding:22px 20px 16px; border-bottom:1px solid var(--line);}
+  .sidebar-head .brand{display:flex; align-items:center; gap:10px; font-family:'Fraunces',serif; font-weight:700; font-size:1rem;}
+  .sidebar-head .seal{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:0.66rem;color:var(--gold);}
+  .sidebar-user{font-size:0.76rem; color:var(--slate); margin-top:10px;}
+  .nav-group{padding:14px 10px;}
+  .nav-group-label{
+    font-family:'JetBrains Mono',monospace; font-size:0.66rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--slate); padding:8px 12px 6px;
+  }
+  .nav-item{
+    display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:8px;
+    font-size:0.88rem; color:var(--paper-dim); background:none; border:none; width:100%; text-align:left;
+  }
+  .nav-item .ic{width:18px; text-align:center; color:var(--slate); font-size:0.9rem;}
+  .nav-item.active{background:var(--navy-2); color:var(--paper);}
+  .nav-item.active .ic{color:var(--gold);}
+  .nav-item:hover{background:rgba(246,241,228,0.04);}
+
+  .main{flex:1; display:flex; flex-direction:column; min-width:0; overflow-y:auto; position:relative;}
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:16px 18px; border-bottom:1px solid var(--line); position:sticky; top:0;
+    background:rgba(27,31,59,0.92); backdrop-filter:blur(8px); z-index:20;
+  }
+  .icon-btn{background:none; border:none; color:var(--paper); font-size:1.1rem; padding:4px;}
+  .topbar-title{font-family:'Fraunces',serif; font-weight:600; font-size:1.02rem; flex:1;}
+  #refreshBtn{transition:transform .5s ease;}
+  #refreshBtn.spinning{animation:spin .6s linear;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .sync-toast{
+    position:absolute; top:66px; left:50%; transform:translateX(-50%) translateY(-8px);
+    background:var(--navy-3); border:1px solid var(--line); color:var(--paper-dim);
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; padding:8px 14px; border-radius:100px;
+    z-index:60; opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease;
+  }
+  .sync-toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .avatar{width:30px; height:30px; border-radius:50%; background:var(--gold); color:var(--navy); font-weight:700; font-size:0.76rem; display:flex; align-items:center; justify-content:center;}
+
+  .view{display:none; padding:20px 18px 40px;}
+  .view.active{display:block;}
+
+  /* Dashboard */
+  .welcome-card{
+    background:linear-gradient(135deg, var(--navy-3), var(--navy-2));
+    border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:22px;
+  }
+  .welcome-card .eyebrow{font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--cyan); letter-spacing:0.08em; text-transform:uppercase;}
+  .welcome-card h3{font-size:1.2rem; margin:8px 0 4px;}
+  .welcome-card p{font-size:0.84rem; color:var(--slate);}
+  .progress-track{height:6px; background:rgba(246,241,228,0.1); border-radius:10px; margin-top:14px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--gold); border-radius:10px; width:34%;}
+
+  .section-label{font-family:'JetBrains Mono',monospace; font-size:0.7rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold); margin:22px 0 12px;}
+  .course-list{display:flex; flex-direction:column; gap:10px;}
+  .course-row{
+    display:flex; align-items:center; gap:12px; background:var(--navy-2);
+    border:1px solid var(--line); border-radius:12px; padding:13px 14px; text-align:left; width:100%; border:none;
+    color:var(--paper);
+  }
+  .course-row .cicon{
+    width:38px; height:38px; border-radius:9px; background:var(--navy-3); display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--gold); flex-shrink:0;
+  }
+  .course-row .cbody{flex:1; min-width:0;}
+  .course-row .cbody h4{font-size:0.9rem; font-weight:600; margin-bottom:2px;}
+  .course-row .cbody span{font-size:0.74rem; color:var(--slate);}
+  .course-row .carrow{color:var(--slate); font-size:0.9rem;}
+
+  /* Reading view */
+  .watermark-layer{
+    position:absolute; inset:0; pointer-events:none; z-index:5;
+    display:grid; grid-template-columns:repeat(3,1fr); opacity:0.06;
+    transform:rotate(-22deg) scale(1.4);
+  }
+  .watermark-layer span{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; padding:26px 6px; white-space:nowrap; text-align:center;
+  }
+  .reading-body{user-select:none; -webkit-user-select:none;}
+  .reading-body h2{font-size:1.3rem; margin-bottom:6px;}
+  .reading-meta{font-size:0.78rem; color:var(--slate); margin-bottom:18px;}
+  .lock-tag{
+    display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace;
+    font-size:0.66rem; color:var(--cyan); border:1px solid rgba(79,209,197,0.3); background:rgba(79,209,197,0.07);
+    padding:4px 9px; border-radius:100px; margin-bottom:16px;
+  }
+  .reading-block{margin-bottom:20px;}
+  .reading-block h3{font-size:1rem; margin-bottom:8px; color:var(--paper);}
+  .reading-block p{font-size:0.88rem; color:var(--paper-dim); line-height:1.65;}
+  .reading-block ul{margin:10px 0 0 18px; font-size:0.86rem; color:var(--paper-dim); line-height:1.7;}
+
+  .outline-card{
+    border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:22px; background:var(--navy-2);
+  }
+  .outline-label{font-family:'JetBrains Mono',monospace; font-size:0.66rem; color:var(--gold); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:10px;}
+  .outline-row{display:flex; align-items:center; gap:10px; font-size:0.83rem; color:var(--paper-dim); padding:7px 0; border-top:1px solid var(--line);}
+  .outline-row:first-of-type{border-top:none;}
+  .outline-num{
+    width:20px; height:20px; border-radius:50%; background:var(--navy-3); color:var(--cyan);
+    font-family:'JetBrains Mono',monospace; font-size:0.66rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+
+  /* Practical mockups */
+  .practical-card{
+    border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-top:10px; background:var(--navy-2);
+  }
+  .practical-head{padding:14px 16px 0;}
+  .practical-head .ptag{font-family:'JetBrains Mono',monospace; font-size:0.66rem; color:var(--gold); text-transform:uppercase; letter-spacing:0.06em;}
+  .practical-head h4{font-size:0.98rem; margin:6px 0 4px;}
+  .practical-head p{font-size:0.82rem; color:var(--slate); margin-bottom:14px; line-height:1.5;}
+  .mock{margin:0 16px 16px; border-radius:10px; overflow:hidden; border:1px solid var(--line); background:var(--ink);}
+  .mock-bar{display:flex; gap:6px; padding:8px 10px; background:#0F1224; border-bottom:1px solid var(--line);}
+  .mock-bar span{width:8px; height:8px; border-radius:50%; background:var(--slate); opacity:.5;}
+  .mock-body{padding:14px;}
+  /* spreadsheet mock */
+  .mock-sheet{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line);}
+  .mock-sheet div{background:var(--navy-2); padding:8px 6px; font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--paper-dim);}
+  .mock-sheet .h{background:var(--navy-3); color:var(--gold); font-weight:700;}
+  /* slide mock */
+  .mock-slide{aspect-ratio:16/9; background:linear-gradient(135deg,var(--navy-3),var(--navy)); border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:12px;}
+  .mock-slide h5{font-family:'Fraunces',serif; color:var(--gold); font-size:0.95rem; margin-bottom:4px;}
+  .mock-slide p{font-size:0.66rem; color:var(--slate);}
+  /* design canvas mock */
+  .mock-canvas{aspect-ratio:4/3; background:var(--paper); border-radius:6px; position:relative; overflow:hidden;}
+  .mock-canvas .shape{position:absolute; border-radius:6px;}
+  /* code editor mock */
+  .mock-code{font-family:'JetBrains Mono',monospace; font-size:0.68rem; line-height:1.8; color:var(--paper-dim);}
+  .mock-code .tag{color:var(--cyan);} .mock-code .attr{color:var(--gold);} .mock-code .str{color:#9AD48E;}
+  /* browser mock */
+  .mock-browser-bar{display:flex; align-items:center; gap:8px; padding:8px 10px; background:#0F1224; border-bottom:1px solid var(--line);}
+  .mock-url{flex:1; background:var(--navy-2); border-radius:6px; padding:4px 10px; font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--slate);}
+  /* terminal mock */
+  .mock-term{font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--cyan); line-height:1.8;}
+
+  .btn-quiz{
+    width:100%; background:var(--gold); color:var(--navy); border:none; border-radius:10px;
+    padding:14px; font-weight:700; font-size:0.9rem; margin-top:24px;
+  }
+
+  /* Quiz / Exam view */
+  .exam-tabs{display:flex; gap:8px; margin-bottom:18px;}
+  .exam-tab{
+    flex:1; text-align:center; padding:10px; border-radius:9px; border:1px solid var(--line);
+    background:var(--navy-2); font-size:0.82rem; font-weight:600; color:var(--slate);
+  }
+  .exam-tab.active{background:var(--navy-3); color:var(--gold); border-color:var(--gold);}
+  .exam-meta{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+  .exam-count{font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--slate);}
+  .exam-timer{
+    font-family:'JetBrains Mono',monospace; font-size:0.82rem; color:var(--red);
+    border:1px solid rgba(232,115,95,0.35); background:rgba(232,115,95,0.08);
+    padding:4px 10px; border-radius:100px;
+  }
+  .exam-progress{height:5px; background:rgba(246,241,228,0.1); border-radius:10px; margin-bottom:22px; overflow:hidden;}
+  .exam-progress-fill{height:100%; background:var(--cyan); width:1.6%;}
+  .q-text{font-size:0.98rem; line-height:1.55; margin-bottom:18px;}
+  .q-options{display:flex; flex-direction:column; gap:10px; margin-bottom:26px;}
+  .q-opt{
+    display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:10px;
+    border:1px solid var(--line); background:var(--navy-2); text-align:left; color:var(--paper); font-size:0.86rem;
+  }
+  .q-opt .letter{
+    width:24px; height:24px; border-radius:50%; border:1px solid var(--slate); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--slate);
+  }
+  .q-opt.sel{border-color:var(--gold); background:rgba(242,169,59,0.08);}
+  .q-opt.sel .letter{border-color:var(--gold); background:var(--gold); color:var(--navy);}
+  .q-theory textarea{
+    width:100%; min-height:140px; background:var(--navy-2); border:1px solid var(--line); border-radius:10px;
+    color:var(--paper); padding:14px; font-size:0.88rem; line-height:1.5; resize:vertical; font-family:'Inter',sans-serif;
+  }
+  .q-theory textarea:focus{outline:none; border-color:var(--cyan);}
+  .word-count{font-size:0.72rem; color:var(--slate); margin-top:8px; text-align:right;}
+  .exam-nav{display:flex; gap:10px; margin-top:24px;}
+  .exam-nav button{flex:1; padding:13px; border-radius:10px; font-weight:700; font-size:0.86rem;}
+  .btn-nav-secondary{background:none; border:1px solid var(--line); color:var(--paper);}
+  .btn-nav-primary{background:var(--gold); border:none; color:var(--navy);}
+
+  .btn-finish{
+    width:100%; background:var(--navy-3); border:1px solid var(--gold); color:var(--gold);
+    border-radius:10px; padding:14px; font-weight:700; font-size:0.88rem; margin-top:26px;
+  }
+  .result-card{
+    display:none; margin-top:20px; border:1px solid var(--line); border-radius:14px; padding:24px;
+    background:linear-gradient(180deg, var(--navy-3), var(--navy-2)); text-align:center;
+  }
+  .result-card.show{display:block;}
+  .result-tag{font-size:0.68rem; color:var(--slate); letter-spacing:0.1em;}
+  .result-score{font-family:'Fraunces',serif; font-weight:700; font-size:2.6rem; margin:10px 0 4px; color:var(--paper);}
+  .result-score span{font-size:1rem; color:var(--slate); font-family:'Inter',sans-serif;}
+  .result-band{
+    display:inline-block; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:0.85rem;
+    padding:6px 16px; border-radius:100px; margin-bottom:12px;
+  }
+  .result-band.fail{background:rgba(232,115,95,0.15); color:var(--red);}
+  .result-band.pass{background:rgba(242,169,59,0.15); color:var(--gold);}
+  .result-band.excellent{background:rgba(79,209,197,0.15); color:var(--cyan);}
+  .result-breakdown{font-size:0.78rem; color:var(--slate); line-height:1.7;}
+
+  .start-gate{
+    border:1px solid var(--gold); border-radius:14px; padding:26px 22px; text-align:center;
+    background:linear-gradient(180deg, var(--navy-3), var(--navy-2));
+  }
+  .start-gate-tag{display:inline-block; font-size:0.66rem; color:var(--red); border:1px solid rgba(232,115,95,0.4); background:rgba(232,115,95,0.08); padding:4px 10px; border-radius:100px; margin-bottom:14px;}
+  .start-gate h3{font-size:1.15rem; margin-bottom:8px;}
+  .start-gate p{font-size:0.85rem; color:var(--paper-dim); line-height:1.55; margin-bottom:16px;}
+  .start-gate-list{list-style:none; text-align:left; margin-bottom:20px;}
+  .start-gate-list li{
+    font-size:0.8rem; color:var(--slate); padding:8px 0; border-top:1px solid var(--line);
+  }
+  .start-gate-list li:first-child{border-top:none;}
+
+  /* Payment view */
+  .pay-card{
+    border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:14px;
+    background:linear-gradient(180deg,var(--navy-3),var(--navy-2)); position:relative;
+  }
+  .pay-card.featured{border-color:var(--gold);}
+  .pay-badge{position:absolute; top:-10px; right:18px; background:var(--gold); color:var(--navy); font-family:'JetBrains Mono',monospace; font-weight:700; font-size:0.62rem; padding:4px 10px; border-radius:100px;}
+  .pay-plan{font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--slate); text-transform:uppercase;}
+  .pay-amount{font-family:'Fraunces',serif; font-weight:700; font-size:1.9rem; margin:6px 0 4px;}
+  .pay-amount span{font-size:0.85rem; color:var(--slate); font-family:'Inter',sans-serif; font-weight:500;}
+  .pay-desc{font-size:0.82rem; color:var(--paper-dim); margin-bottom:14px; line-height:1.5;}
+  .pay-btn{width:100%; background:var(--gold); color:var(--navy); border:none; border-radius:9px; padding:12px; font-weight:700; font-size:0.85rem;}
+  .pay-status{
+    display:flex; align-items:center; gap:10px; background:var(--navy-2); border:1px solid var(--line);
+    border-radius:10px; padding:12px 14px; margin-bottom:18px; font-size:0.82rem; color:var(--paper-dim);
+  }
+  .pay-status .dot{width:8px; height:8px; border-radius:50%; background:var(--gold); flex-shrink:0;}
+
+  .palmpay-box{background:var(--ink); border:1px dashed var(--line); border-radius:10px; padding:14px; margin-bottom:16px;}
+  .palmpay-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .palmpay-row.sub{margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
+  .palmpay-label{font-family:'JetBrains Mono',monospace; font-size:0.66rem; color:var(--slate); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;}
+  .palmpay-acc{font-size:1.15rem; font-weight:700; color:var(--gold); letter-spacing:0.02em;}
+  .palmpay-val{font-size:0.86rem; color:var(--paper-dim); font-weight:600;}
+  .copy-acc-btn{background:var(--navy-2); border:1px solid var(--line); color:var(--paper); font-size:0.72rem; font-weight:700; padding:8px 14px; border-radius:8px;}
+  .copy-acc-btn.copied{background:var(--cyan); color:var(--navy); border-color:var(--cyan);}
+  .pay-steps{margin:0 0 20px 18px; font-size:0.82rem; color:var(--paper-dim); line-height:1.7;}
+
+  .plan-select{display:flex; gap:8px;}
+  .plan-opt{flex:1; padding:11px; border-radius:9px; border:1px solid var(--line); background:var(--navy-2); color:var(--slate); font-size:0.8rem; font-weight:600;}
+  .plan-opt.active{border-color:var(--gold); color:var(--gold); background:rgba(242,169,59,0.08);}
+
+  .upload-box{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    border:1.5px dashed var(--line); border-radius:12px; padding:26px 16px; text-align:center;
+    cursor:pointer; background:var(--navy-2); transition:border-color .15s;
+  }
+  .upload-box:hover{border-color:var(--cyan);}
+  .upload-box.filled{padding:10px;}
+  #uploadIcon{font-size:1.3rem; color:var(--gold);}
+  #uploadText{font-size:0.8rem; color:var(--slate); line-height:1.5;}
+  #uploadText span{font-size:0.7rem; color:var(--slate); opacity:.7;}
+  #uploadPreview{max-height:160px; border-radius:8px; margin:0 auto;}
+
+  .verify-note{margin-top:12px; font-size:0.78rem; color:var(--cyan); text-align:center; min-height:1em;}
+  .pay-btn:disabled{opacity:0.45; pointer-events:none;}
+
+  .student-list{display:flex; flex-direction:column; gap:10px;}
+  .student-row{
+    display:flex; align-items:center; gap:12px; background:var(--navy-2); border:1px solid var(--line);
+    border-radius:12px; padding:12px 14px;
+  }
+  .student-row .savatar{
+    width:36px; height:36px; border-radius:50%; background:var(--navy-3); color:var(--gold);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.72rem; flex-shrink:0;
+  }
+  .student-row .sbody{flex:1; min-width:0;}
+  .student-row .sbody h4{font-size:0.86rem; font-weight:600; margin-bottom:2px; color:var(--paper);}
+  .student-row .sbody span{font-size:0.72rem; color:var(--slate);}
+  .student-badge{
+    font-family:'JetBrains Mono',monospace; font-size:0.64rem; font-weight:700; padding:4px 9px; border-radius:100px;
+    background:rgba(79,209,197,0.12); color:var(--cyan); white-space:nowrap;
+  }
+  .student-empty{font-size:0.82rem; color:var(--slate); text-align:center; padding:30px 10px; border:1px dashed var(--line); border-radius:12px;}
+
+  /* Handout / deep reading content */
+  .handout-tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap;}
+  .handout-tab{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; font-weight:600; padding:7px 12px;
+    border-radius:100px; border:1px solid var(--line); background:var(--navy-2); color:var(--slate);
+  }
+  .handout-tab.active{background:var(--navy-3); color:var(--gold); border-color:var(--gold);}
+  .key-terms{
+    display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid var(--line);
+  }
+  .key-term{
+    font-family:'JetBrains Mono',monospace; font-size:0.68rem; background:var(--navy-2); color:var(--cyan);
+    border:1px solid rgba(79,209,197,0.25); padding:5px 10px; border-radius:7px;
+  }
+
+  /* mock file-name label in bar */
+  .mock-label{margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--slate);}
+
+  /* diagram mock (CA-101) */
+  .mock-diagram{display:flex; flex-direction:column; align-items:center; gap:14px; padding:6px 0;}
+  .diag-monitor{position:relative; width:70%;}
+  .diag-screen{width:100%; aspect-ratio:16/10; background:var(--navy-3); border:3px solid var(--slate); border-radius:6px;}
+  .diag-row{display:flex; gap:16px; align-items:flex-end; position:relative; width:100%; justify-content:center;}
+  .diag-tower{width:20%; height:40px; background:var(--navy-3); border:2px solid var(--slate); border-radius:4px; position:relative;}
+  .diag-kb{width:38%; height:16px; background:var(--navy-3); border:2px solid var(--slate); border-radius:4px; position:relative;}
+  .diag-mouse{width:14px; height:20px; background:var(--navy-3); border:2px solid var(--slate); border-radius:50% 50% 50% 50% / 60% 60% 40% 40%; display:inline-block;}
+  .diag-usb{width:16px; height:8px; background:var(--gold); border-radius:2px; display:inline-block; margin-left:8px;}
+  .diag-tag{
+    font-family:'JetBrains Mono',monospace; font-size:0.58rem; color:var(--gold);
+    background:var(--ink); border:1px solid var(--gold); border-radius:4px; padding:2px 5px;
+    position:relative; margin-left:6px;
+  }
+
+  /* CV mock (WD-102) */
+  .cv-mock{padding:2px;}
+  .cv-header{font-family:'Fraunces',serif; font-weight:700; font-size:0.95rem; color:var(--paper); display:block; margin-bottom:10px;}
+  .cv-header span{display:block; font-family:'Inter',sans-serif; font-weight:400; font-size:0.68rem; color:var(--slate); margin-top:3px;}
+  .cv-cols{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .cv-label{font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--gold); text-transform:uppercase; margin-bottom:6px;}
+  .cv-table{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); font-size:0.68rem;}
+  .cv-table div{background:var(--navy-2); padding:5px 6px; color:var(--paper-dim);}
+  .cv-text{font-size:0.68rem; color:var(--paper-dim); line-height:1.5;}
+
+  /* spreadsheet grade colours + formula bar */
+  .g-a{color:#7FD98A; font-weight:700;} .g-b{color:var(--gold); font-weight:700;} .g-c{color:var(--red); font-weight:700;}
+  .mock-formula{margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:0.64rem; color:var(--cyan); background:var(--ink); padding:6px 8px; border-radius:6px;}
+
+  /* deck strip (PP-102) */
+  .deck-strip{display:grid; grid-template-columns:repeat(6,1fr); gap:5px;}
+  .deck-thumb{
+    aspect-ratio:4/3; background:var(--navy); border:1px solid var(--line); border-radius:4px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    font-size:0.55rem; color:var(--slate);
+  }
+  .deck-thumb span{font-family:'JetBrains Mono',monospace; color:var(--gold); font-size:0.6rem;}
+
+  /* logo pair (CD-201) */
+  .logo-pair{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .logo-box{aspect-ratio:1; background:var(--paper); border-radius:8px; position:relative; overflow:hidden;}
+  .logo-caption{position:absolute; bottom:6px; left:0; right:0; text-align:center; font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--ink); opacity:.6;}
+
+  /* inbox (IN-101) */
+  .inbox-mock{display:flex; gap:0; min-height:140px;}
+  .inbox-sidebar{width:34%; border-right:1px solid var(--line); padding-right:10px;}
+  .inbox-folder{font-size:0.72rem; color:var(--slate); padding:6px 4px; border-radius:5px; display:flex; justify-content:space-between;}
+  .inbox-folder.active{background:var(--navy-2); color:var(--paper);}
+  .inbox-folder span{color:var(--gold); font-family:'JetBrains Mono',monospace; font-size:0.62rem;}
+  .inbox-list{flex:1; padding-left:12px; display:flex; flex-direction:column; gap:9px;}
+  .inbox-item strong{display:block; font-size:0.72rem; color:var(--paper);}
+  .inbox-item span{display:block; font-size:0.68rem; color:var(--slate); margin-top:1px;}
+
+  /* web preview (WEB-201) */
+  .web-preview{background:var(--paper); border-radius:8px; padding:16px; text-align:center;}
+  .web-preview-header{font-family:'Fraunces',serif; font-weight:700; color:var(--ink); font-size:1rem;}
+  .web-preview-sub{font-size:0.68rem; color:#5A5A66; margin-top:2px;}
+  .web-preview-tags{display:flex; gap:6px; justify-content:center; margin-top:10px;}
+  .web-preview-tags span{font-family:'JetBrains Mono',monospace; font-size:0.6rem; background:var(--navy); color:var(--cyan); padding:3px 8px; border-radius:100px;}
+
+  /* quiz ui (JS-301) */
+  .quiz-ui{}
+  .quiz-progress{font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--slate); margin-bottom:10px;}
+  .quiz-q{font-size:0.82rem; color:var(--paper); margin-bottom:10px;}
+  .quiz-opt-mini{font-size:0.72rem; padding:8px 10px; border-radius:7px; background:var(--navy-2); border:1px solid var(--line); color:var(--paper-dim); margin-bottom:6px;}
+  .quiz-opt-mini.sel{border-color:var(--cyan); color:var(--cyan); background:rgba(79,209,197,0.08);}
+
+  /* checklist (HK-301) */
+  .checklist{display:flex; flex-direction:column; gap:8px;}
+  .check-row{font-size:0.76rem; color:var(--slate); display:flex; align-items:center; gap:8px;}
+  .check-row.done{color:var(--paper-dim);}
+  .check-mark{color:var(--cyan); font-weight:700;}
+  .check-row:not(.done) .check-mark{color:var(--gold);}
+
+  /* focus-lock blur overlay (anti-screenshot deterrent) */
+  #blurGuard{
+    position:absolute; inset:0; z-index:100; display:none;
+    backdrop-filter:blur(22px); background:rgba(20,24,43,0.75);
+    align-items:center; justify-content:center; text-align:center; padding:30px;
+  }
+  #blurGuard.show{display:flex;}
+  #blurGuard p{font-size:0.9rem; color:var(--paper-dim); max-width:26ch;}
+  #blurGuard .mono{color:var(--gold); display:block; margin-bottom:10px; font-size:0.72rem; letter-spacing:0.08em;}
+
+  ::-webkit-scrollbar{width:0; height:0;}
+
+  /* Draggable floating timer */
+  .float-timer{
+    position:absolute; width:62px; height:62px; border-radius:50%;
+    background:var(--gold); color:var(--navy);
+    display:none; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:0.8rem;
+    box-shadow:0 10px 24px rgba(0,0,0,0.35);
+    z-index:90; cursor:grab; touch-action:none; user-select:none;
+    right:20px; bottom:100px;
+    transition:background .2s ease, box-shadow .2s ease;
+  }
+  .float-timer.visible{display:flex;}
+  .float-timer.running{background:var(--cyan);}
+  .float-timer.done{background:var(--red); color:var(--paper);}
+  .float-timer.dragging{cursor:grabbing; box-shadow:0 16px 34px rgba(0,0,0,0.5);}
+  .float-timer::after{
+    content:"tap to start"; position:absolute; bottom:-20px; left:50%; transform:translateX(-50%);
+    font-size:0.56rem; color:var(--slate); white-space:nowrap; font-family:'Inter',sans-serif;
+  }
+  .float-timer.running::after{content:"tap to pause";}
+  .float-timer.done::after{content:"time's up — tap to reset";}
+</style>
+</head>
+<body>
+
+<div class="app-frame" id="appFrame">
+
+  <!-- ============ SPLASH ============ -->
+  <div class="screen active" id="screen-splash">
+    <div class="splash-seal">A3</div>
+    <div class="splash-pre">Loading your workspace</div>
+    <h1 class="splash-title">WELCOME TO<br><em>A3 GRAPHIC DESIGN</em></h1>
+    <div class="splash-motto">"WE DELIVER WITH TRUST"</div>
+    <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
+    <button class="splash-tap" onclick="showScreen('screen-login')" style="background:none;border:none;color:var(--slate);">Tap to continue →</button>
+  </div>
+
+  <!-- ============ LOGIN ============ -->
+  <div class="screen" id="screen-login">
+    <div class="auth-wrap">
+      <div class="auth-top">
+        <div class="seal">A3</div>
+        <h2>Sign in to A3 Brain Storm</h2>
+        <p>Access your courses, past questions and mock exams.</p>
+      </div>
+      <button class="btn-google" onclick="showScreen('screen-pin')">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.83.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .98 4.97l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+      <div class="divider">or use email</div>
+      <div class="field">
+        <label>Full name</label>
+        <input type="text" id="nameInput" placeholder="e.g. Chidera Okafor">
+      </div>
+      <div class="field">
+        <label>Email address</label>
+        <input type="email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="field-input-wrap">
+          <input type="password" id="pwInput" placeholder="Minimum 8 characters">
+          <button class="toggle-eye" onclick="togglePw()">SHOW</button>
+        </div>
+        <div class="field-hint">Use at least 8 characters, with a number and a symbol.</div>
+      </div>
+      <div class="field">
+        <label>Passport photograph</label>
+        <label class="upload-box" id="passportBox" for="passportInput">
+          <div id="passportIcon">⬆</div>
+          <div id="passportText">Tap to upload a clear passport photo<br><span>JPG or PNG · used on your student ID</span></div>
+          <img id="passportPreview" style="display:none;">
+        </label>
+        <input type="file" id="passportInput" accept="image/*" style="display:none;" onchange="handlePassport(event)">
+      </div>
+      <button class="btn-primary" onclick="showScreen('screen-pin')">Create account</button>
+      <p class="auth-switch">Already registered? <a href="#">Sign in</a></p>
+    </div>
+  </div>
+
+  <!-- ============ PIN ============ -->
+  <div class="screen" id="screen-pin">
+    <div class="pin-wrap">
+      <h2>Set your 4-digit PIN</h2>
+      <p>This adds a second lock on top of your password —<br>you'll enter it every time you open the app.</p>
+      <div class="pin-dots" id="pinDots">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <div class="pin-pad">
+        <button class="pin-key" onclick="pinPress(1)">1</button>
+        <button class="pin-key" onclick="pinPress(2)">2</button>
+        <button class="pin-key" onclick="pinPress(3)">3</button>
+        <button class="pin-key" onclick="pinPress(4)">4</button>
+        <button class="pin-key" onclick="pinPress(5)">5</button>
+        <button class="pin-key" onclick="pinPress(6)">6</button>
+        <button class="pin-key" onclick="pinPress(7)">7</button>
+        <button class="pin-key" onclick="pinPress(8)">8</button>
+        <button class="pin-key" onclick="pinPress(9)">9</button>
+        <div></div>
+        <button class="pin-key" onclick="pinPress(0)">0</button>
+        <button class="pin-key ghost" onclick="pinClear()">⌫</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MAIN APP ============ -->
+  <div class="screen" id="screen-app">
+    <div class="sidebar-scrim" id="scrim" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <div class="brand"><div class="seal">A3</div>Brain Storm</div>
+        <div class="sidebar-user">Signed in as <strong>Student</strong> · PIN locked</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Overview</div>
+        <button class="nav-item active" data-view="view-dashboard" onclick="goView(this)"><span class="ic">▦</span>Dashboard</button>
+        <button class="nav-item" data-view="view-assignments" onclick="goView(this)"><span class="ic">◷</span>Assignments</button>
+        <button class="nav-item" data-view="view-payment" onclick="goView(this)"><span class="ic">₦</span>Payment</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Courses</div>
+        <button class="nav-item" data-view="view-reading" onclick="openReading('CA-101','Computer Appreciation')"><span class="ic">01</span>Computer Appreciation</button>
+        <button class="nav-item" data-view="view-reading" onclick="openReading('WD-102','MS Word')"><span class="ic">02</span>MS Word</button>
+        <button class="nav-item" data-view="view-reading" onclick="openReading('XL-201','MS Excel')"><span class="ic">03</span>MS Excel</button>
+        <button class="nav-item" data-view="view-reading" onclick="openReading('PP-102','PowerPoint')"><span class="ic">04</span>PowerPoint Presentation</button>
+        <button class="nav-item" data-view="view-reading" onclick="openReading('CD-201','CorelDraw')"><span class="ic">05</span>CorelDraw</button>
+        <button class="nav-item" data-view="view-reading" onclick="openReading('IN-101','Internet')"><span class="ic">06</span>Internet</button>
+        <button class="nav-item" data-view="view-reading" onclick="openReading('WEB-201','HTML &amp; CSS')"><span class="ic">07</span>HTML &amp; CSS</button>
+        <button class="nav-item" data-view="view-reading" onclick="openReading('JS-301','JavaScript')"><span class="ic">08</span>JavaScript</button>
+        <button class="nav-item" data-view="view-reading" onclick="openReading('HK-301','Online Security')"><span class="ic">09</span>Online Security &amp; Ethical Hacking</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Assessment</div>
+        <button class="nav-item" data-view="view-quiz" onclick="goView(this)"><span class="ic">✓</span>Quizzes &amp; Exams</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Community</div>
+        <button class="nav-item" data-view="view-students" onclick="goView(this)"><span class="ic">☺</span>Enrolled Students</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Account</div>
+        <button class="nav-item" onclick="showScreen('screen-login')"><span class="ic">⏻</span>Log out</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="sync-toast" id="syncToast">Content synced</div>
+      <div class="topbar">
+        <button class="icon-btn" onclick="openSidebar()">☰</button>
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <button class="icon-btn" id="refreshBtn" onclick="refreshApp()" aria-label="Refresh">⟳</button>
+        <div class="avatar">ST</div>
+      </div>
+
+      <!-- Dashboard -->
+      <div class="view active" id="view-dashboard">
+        <div class="welcome-card" id="dashWelcomeCard">
+          <span class="eyebrow" id="dashEyebrow">Continue learning</span>
+          <h3 id="dashHeadline">MS Excel — Formulas &amp; Functions</h3>
+          <p id="dashSub">You're 34% through this course. Pick up where you left off.</p>
+          <div class="progress-track"><div class="progress-fill"></div></div>
+        </div>
+        <div class="section-label">Your courses</div>
+        <div class="course-list">
+          <button class="course-row" onclick="openReading('CA-101','Computer Appreciation')"><div class="cicon">01</div><div class="cbody"><h4>Computer Appreciation</h4><span>Beginner · 8 lessons</span></div><div class="carrow">›</div></button>
+          <button class="course-row" onclick="openReading('XL-201','MS Excel')"><div class="cicon">03</div><div class="cbody"><h4>MS Excel</h4><span>Intermediate · 34% complete</span></div><div class="carrow">›</div></button>
+          <button class="course-row" onclick="openReading('WEB-201','HTML &amp; CSS')"><div class="cicon">07</div><div class="cbody"><h4>HTML &amp; CSS</h4><span>Intermediate · 12 lessons</span></div><div class="carrow">›</div></button>
+          <button class="course-row" onclick="openReading('JS-301','JavaScript')"><div class="cicon">08</div><div class="cbody"><h4>JavaScript</h4><span>Advanced · 16 lessons</span></div><div class="carrow">›</div></button>
+        </div>
+      </div>
+
+      <!-- Reading -->
+      <div class="view" id="view-reading">
+        <div class="watermark-layer" id="watermarkLayer"></div>
+        <div class="reading-body" id="readingBody">
+          <!-- injected by JS -->
+        </div>
+      </div>
+
+      <!-- Assignments -->
+      <div class="view" id="view-assignments">
+        <div class="section-label">Due this week</div>
+        <div class="course-list">
+          <button class="course-row"><div class="cicon">03</div><div class="cbody"><h4>Excel — Budget sheet</h4><span>Due in 2 days</span></div><div class="carrow">›</div></button>
+          <button class="course-row"><div class="cicon">05</div><div class="cbody"><h4>CorelDraw — Logo concept</h4><span>Due in 4 days</span></div><div class="carrow">›</div></button>
+          <button class="course-row"><div class="cicon">07</div><div class="cbody"><h4>HTML &amp; CSS — Landing page</h4><span>Due in 6 days</span></div><div class="carrow">›</div></button>
+        </div>
+      </div>
+
+      <!-- Quiz / Exam -->
+      <div class="view" id="view-quiz">
+
+        <div class="start-gate" id="startGate">
+          <span class="start-gate-tag mono">Assessment locked</span>
+          <h3>Objective &amp; Theory Exam</h3>
+          <p>60 objective questions (60 marks) and 20 theory questions (40 marks), marked out of 100. The timer only begins once you press Start — nothing loads until then.</p>
+          <ul class="start-gate-list">
+            <li>60 objective questions · 1 mark each</li>
+            <li>20 theory questions · 2 marks each</li>
+            <li>50 and below = Fail · 51–70 = Pass · 71–100 = Excellent</li>
+          </ul>
+          <button class="btn-primary" onclick="startExam()">Start exam</button>
+        </div>
+
+        <div id="examContent" style="display:none;">
+        <div class="exam-tabs">
+          <button class="exam-tab active" id="tabObjective" onclick="switchExamTab('objective')">Objective · 60</button>
+          <button class="exam-tab" id="tabTheory" onclick="switchExamTab('theory')">Theory · 20</button>
+        </div>
+
+        <div id="objectiveBlock">
+          <div class="exam-meta">
+            <span class="exam-count mono" id="objCount">Question 1 of 60</span>
+            <span class="exam-timer mono" id="objTimer">44:58</span>
+          </div>
+          <div class="exam-progress"><div class="exam-progress-fill" id="objProgress"></div></div>
+          <div class="q-text" id="objQText">Which shortcut opens the "Find and Replace" dialog in MS Word?</div>
+          <div class="q-options" id="objOptions">
+            <button class="q-opt" onclick="selectOpt(this)"><span class="letter">A</span> Ctrl + H</button>
+            <button class="q-opt" onclick="selectOpt(this)"><span class="letter">B</span> Ctrl + P</button>
+            <button class="q-opt" onclick="selectOpt(this)"><span class="letter">C</span> Ctrl + N</button>
+            <button class="q-opt" onclick="selectOpt(this)"><span class="letter">D</span> Ctrl + K</button>
+          </div>
+          <div class="exam-nav">
+            <button class="btn-nav-secondary" onclick="objStep(-1)">Previous</button>
+            <button class="btn-nav-primary" onclick="objStep(1)">Next</button>
+          </div>
+        </div>
+
+        <div id="theoryBlock" style="display:none;">
+          <div class="exam-meta">
+            <span class="exam-count mono" id="theoCount">Question 1 of 20</span>
+            <span class="exam-timer mono" id="theoTimer">29:41</span>
+          </div>
+          <div class="exam-progress"><div class="exam-progress-fill" id="theoProgress" style="width:5%;"></div></div>
+          <div class="q-text">Explain, in your own words, the difference between "Save" and "Save As" in MS Word — and give one real situation where you would use "Save As".</div>
+          <div class="q-theory">
+            <textarea placeholder="Type your answer here..." oninput="updateWordCount(this)"></textarea>
+            <div class="word-count" id="wordCount">0 words</div>
+          </div>
+          <div class="exam-nav">
+            <button class="btn-nav-secondary" onclick="theoStep(-1)">Previous</button>
+            <button class="btn-nav-primary" onclick="theoStep(1)">Next</button>
+          </div>
+        </div>
+
+        <button class="btn-finish" onclick="finishExam()">Finish exam &amp; see result</button>
+
+        <div class="result-card" id="resultCard">
+          <span class="result-tag mono" id="resultTag">RESULT</span>
+          <div class="result-score" id="resultScore">0<span>/100</span></div>
+          <div class="result-band" id="resultBand">—</div>
+          <div class="result-breakdown" id="resultBreakdown"></div>
+          <button class="btn-nav-secondary" style="width:100%; margin-top:16px;" onclick="closeResult()">Close</button>
+        </div>
+        </div>
+      </div>
+
+      <!-- Payment -->
+      <div class="view" id="view-payment">
+        <div class="pay-status" id="payStatusBanner"><span class="dot"></span> Access: Free trial · no payment received yet</div>
+        <div class="pay-card">
+          <div class="pay-plan">Complete your payment</div>
+          <div class="pay-amount">₦5,000 <span>balance due</span></div>
+          <div class="pay-desc">Clear your balance to keep uninterrupted access to every course and exam.</div>
+          <button class="pay-btn">Pay ₦5,000 now</button>
+        </div>
+        <div class="pay-card featured">
+          <div class="pay-badge">Best value</div>
+          <div class="pay-plan">Upgrade to full access</div>
+          <div class="pay-amount">₦10,000 <span>one-time</span></div>
+          <div class="pay-desc">Clear everything in one payment — no balance, no reminders, all courses unlocked for good.</div>
+          <button class="pay-btn">Pay in full</button>
+        </div>
+
+        <div class="section-label">Pay by bank transfer</div>
+        <div class="pay-card">
+          <div class="pay-plan">Transfer to PalmPay</div>
+          <div class="palmpay-box">
+            <div class="palmpay-row">
+              <div>
+                <div class="palmpay-label">Account number</div>
+                <div class="palmpay-acc mono" id="palmAcc">7042717125</div>
+              </div>
+              <button class="copy-acc-btn" onclick="copyAcc()" id="copyBtn">Copy</button>
+            </div>
+            <div class="palmpay-row sub">
+              <div><div class="palmpay-label">Bank</div><div class="palmpay-val">PalmPay</div></div>
+              <div><div class="palmpay-label">Account name</div><div class="palmpay-val">Abdulmalik Adebayo Ayobami</div></div>
+            </div>
+          </div>
+          <ul class="pay-steps">
+            <li>Transfer ₦5,000 (partial) or ₦10,000 (full access) to the PalmPay account above.</li>
+            <li>Take a clear screenshot or photo of the payment receipt.</li>
+            <li>Upload it below with your details so we can confirm and unlock your access.</li>
+          </ul>
+
+          <div class="field">
+            <label>Full name on the transfer</label>
+            <input type="text" id="payerNameInput" placeholder="e.g. Chidera Okafor">
+          </div>
+          <div class="field">
+            <label>Plan paid for</label>
+            <div class="plan-select">
+              <button class="plan-opt active" onclick="selectPlan(this)" data-plan="5000">₦5,000 Partial</button>
+              <button class="plan-opt" onclick="selectPlan(this)" data-plan="10000">₦10,000 Full</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Upload payment receipt</label>
+            <label class="upload-box" id="uploadBox" for="receiptInput">
+              <div id="uploadIcon">⬆</div>
+              <div id="uploadText">Tap to upload a screenshot or photo of your receipt<br><span>JPG or PNG</span></div>
+              <img id="uploadPreview" style="display:none;">
+            </label>
+            <input type="file" id="receiptInput" accept="image/*" style="display:none;" onchange="handleReceipt(event)">
+          </div>
+
+          <button class="pay-btn" onclick="submitReceipt()" id="submitReceiptBtn" disabled>Submit receipt for verification</button>
+          <div class="verify-note" id="verifyNote"></div>
+        </div>
+      </div>
+
+      <!-- Enrolled Students -->
+      <div class="view" id="view-students">
+        <div class="section-label">Students who have paid</div>
+        <p style="font-size:0.82rem; color:var(--slate); margin-bottom:16px; line-height:1.5;">This list updates automatically the moment a student's payment receipt is submitted.</p>
+        <div class="student-list" id="studentList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Draggable 3-minute timer -->
+  <div id="floatTimer" class="float-timer">
+    <span id="timerText">3:00</span>
+  </div>
+
+  <!-- Anti-screenshot focus-loss guard -->
+  <div id="blurGuard"><p><span class="mono">CONTENT PROTECTED</span>This material is locked to your account and hidden while the app is out of focus.</p></div>
+</div>
+
+<script>
+  /* ---------- Screen routing ---------- */
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  setTimeout(() => showScreen('screen-login'), 3500);
+
+  /* ---------- Password show/hide ---------- */
+  function togglePw(){
+    const el = document.getElementById('pwInput');
+    el.type = el.type === 'password' ? 'text' : 'password';
+  }
+
+  /* ---------- PIN pad ---------- */
+  let pin = "";
+  function pinPress(n){
+    if(pin.length >= 4) return;
+    pin += n;
+    renderPin();
+    if(pin.length === 4){
+      setTimeout(() => { pin=""; renderPin(); enterApp(); }, 350);
+    }
+  }
+  function pinClear(){ pin = pin.slice(0,-1); renderPin(); }
+  function renderPin(){
+    document.querySelectorAll('.pin-dot').forEach((d,i) => d.classList.toggle('filled', i < pin.length));
+  }
+  function enterApp(){
+    showScreen('screen-app');
+    applyStudentProfile();
+    buildWatermark();
+  }
+
+  function applyStudentProfile(){
+    const nameEl = document.getElementById('nameInput');
+    const name = (nameEl && nameEl.value.trim()) || "Student";
+    const initials = name.split(/\s+/).filter(Boolean).slice(0,2).map(w => w[0].toUpperCase()).join("") || "ST";
+    document.querySelectorAll('.avatar').forEach(a => { if(!a.style.backgroundImage) a.textContent = initials; });
+    const sidebarUser = document.querySelector('.sidebar-user');
+    if(sidebarUser) sidebarUser.innerHTML = `Signed in as <strong>${name}</strong> · PIN locked`;
+    studentName = name;
+  }
+  let studentName = "Student";
+
+  /* ---------- Draggable 3-minute timer ---------- */
+  (function(){
+    const el = document.getElementById('floatTimer');
+    const txt = document.getElementById('timerText');
+    const frame = document.getElementById('appFrame');
+    let dragging = false, moved = false, startX, startY, startLeft, startTop;
+    let timeLeft = 180, running = false, tickHandle = null;
+
+    function fmt(s){ const m = Math.floor(s/60); const r = s%60; return m + ":" + String(r).padStart(2,'0'); }
+    function render(){ txt.textContent = fmt(timeLeft); }
+    render();
+
+    function tick(){
+      timeLeft--;
+      if(timeLeft <= 0){
+        timeLeft = 0; running = false; clearInterval(tickHandle);
+        el.classList.remove('running'); el.classList.add('done');
+      }
+      render();
+    }
+    function toggleTimer(){
+      if(el.classList.contains('done')){
+        timeLeft = 180; el.classList.remove('done'); render(); return;
+      }
+      running = !running;
+      if(running){
+        el.classList.add('running');
+        tickHandle = setInterval(tick, 1000);
+      } else {
+        el.classList.remove('running');
+        clearInterval(tickHandle);
+      }
+    }
+
+    function getPos(e){ return e.touches ? e.touches[0] : e; }
+
+    function onDown(e){
+      dragging = true; moved = false;
+      const p = getPos(e);
+      const rect = el.getBoundingClientRect();
+      const frect = frame.getBoundingClientRect();
+      startX = p.clientX; startY = p.clientY;
+      startLeft = rect.left - frect.left; startTop = rect.top - frect.top;
+      el.classList.add('dragging');
+      el.style.right = 'auto'; el.style.bottom = 'auto';
+      el.style.left = startLeft + 'px'; el.style.top = startTop + 'px';
+    }
+    function onMove(e){
+      if(!dragging) return;
+      const p = getPos(e);
+      const dx = p.clientX - startX, dy = p.clientY - startY;
+      if(Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+      const frect = frame.getBoundingClientRect();
+      let newLeft = startLeft + dx, newTop = startTop + dy;
+      newLeft = Math.max(4, Math.min(frect.width - el.offsetWidth - 4, newLeft));
+      newTop = Math.max(4, Math.min(frect.height - el.offsetHeight - 4, newTop));
+      el.style.left = newLeft + 'px'; el.style.top = newTop + 'px';
+    }
+    function onUp(){
+      if(!dragging) return;
+      dragging = false;
+      el.classList.remove('dragging');
+      if(!moved) toggleTimer();
+    }
+    el.addEventListener('mousedown', onDown);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    el.addEventListener('touchstart', onDown, {passive:true});
+    window.addEventListener('touchmove', onMove, {passive:true});
+    window.addEventListener('touchend', onUp);
+
+    // Exposed so the exam's "Start" button can show the timer and begin it automatically
+    window.examTimer = {
+      startFresh(){
+        clearInterval(tickHandle);
+        timeLeft = 180; running = false;
+        el.classList.remove('done');
+        el.classList.add('visible');
+        render();
+        running = true;
+        el.classList.add('running');
+        tickHandle = setInterval(tick, 1000);
+      },
+      hide(){
+        el.classList.remove('visible');
+      }
+    };
+  })();
+
+  /* ---------- Refresh ---------- */
+  function refreshApp(){
+    const btn = document.getElementById('refreshBtn');
+    btn.classList.add('spinning');
+    setTimeout(() => btn.classList.remove('spinning'), 600);
+
+    // Re-render whatever view is currently open, as if pulling fresh data
+    const activeNav = document.querySelector('.nav-item.active');
+    if(activeNav && activeNav.dataset.view === 'view-reading'){
+      buildWatermark();
+    }
+
+    const toast = document.getElementById('syncToast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1400);
+  }
+
+  /* ---------- Sidebar ---------- */
+  function openSidebar(){ document.getElementById('sidebar').classList.add('open'); document.getElementById('scrim').classList.add('show'); }
+  function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('scrim').classList.remove('show'); }
+
+  function goView(el){
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    const viewId = el.dataset.view;
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    document.getElementById('topbarTitle').textContent = el.textContent.trim();
+    closeSidebar();
+  }
+
+  /* ---------- Course reading data + practicals ---------- */
+  const courseData = {
+    "CA-101": { level:"Beginner", topic:"The meaning of a computer, its generations, and its hardware, software and file systems.",
+      sections:[
+        {h:"1. What is a computer?", body:"A computer is an electronic device that accepts data as input, processes that data according to a set of stored instructions (a program), and produces output — turning raw data into useful information. What makes it different from a calculator or a typewriter is that it's programmable: the same machine can type a letter, play music, or run a business, depending only on the software it's given. Its defining characteristics are speed (millions of operations per second), accuracy, huge storage capacity, and the ability to repeat the same task endlessly without getting tired or making a careless mistake."},
+        {h:"2. The generations of computers", body:"Computers are grouped into 'generations' by the core technology used to build them. The First Generation (1940s–1950s) used vacuum tubes — huge, hot and unreliable. The Second Generation (1950s–1960s) replaced tubes with transistors, making computers smaller, faster and more dependable. The Third Generation (1960s–1970s) introduced the integrated circuit, packing many transistors onto one chip. The Fourth Generation (1970s–present) is built on the microprocessor — a whole processing unit on a single chip — which is what made the personal computer, laptop and smartphone possible. The Fifth Generation (present and emerging) is defined by artificial intelligence, and increasingly, early quantum computing. Each jump made computers smaller, cheaper, faster and more accessible to ordinary people than the generation before it."},
+        {h:"3. Hardware vs. software", body:"Hardware is anything you can physically touch — the monitor, keyboard, mouse, and the case housing the processor and storage. Software is the instructions that run on that hardware: an operating system like Windows, and applications like Word or a browser. A computer with hardware but no software is just an expensive box; understanding this split is the foundation everything else in this course builds on."},
+        {h:"4. Input, output and storage", body:"Input devices (keyboard, mouse, scanner, microphone) send information into the computer. Output devices (monitor, printer, speakers) send information back out to you. Storage devices — the internal hard drive or SSD, plus USB flash drives and memory cards — hold your files even after the computer is switched off. Knowing which device does which job helps you troubleshoot when something 'isn't working': is it an input problem, an output problem, or a storage problem?"},
+        {h:"5. Files, folders and the desktop", body:"Every file has a name and a type, shown by its extension (.docx, .jpg, .pdf). Folders group related files so you can find them again — a well-organised computer might have one folder per course, one per project, or one per year. The desktop is just a special folder that's always visible when you start the computer. Learning to name files clearly and file them consistently is a small habit that saves hours later."},
+        {h:"6. Classifying computers by size and use", body:"Supercomputers are the fastest and most powerful, used for tasks like weather forecasting and scientific research. Mainframes handle huge volumes of processing for large organisations such as banks. Microcomputers — desktops and laptops — are what most individuals actually use day to day. Below that sit mobile devices: tablets and smartphones are, technically, computers too, just built for portability over raw power. Recognising which category a device falls into helps explain why it's fast at some jobs and completely unsuited to others."}
+      ],
+      mistakes:["Calling the whole computer 'the CPU' — the CPU is only the processor chip inside the case.","Saving every file straight to the desktop instead of a named folder, until nothing can be found again.","Assuming a smartphone 'isn't really a computer' — by definition, anything that takes input, processes it, and gives output is one."],
+      summary:"By the end of this course you should be able to define what a computer actually is, explain how it evolved through five generations of technology, name every major part of a modern one, and keep your own files organised well enough that you can find any of them six months from now.",
+      keyTerms:["Computer","Generation","Vacuum tube","Microprocessor","Hardware","Software","Input device","Output device","Supercomputer"],
+      practical:{tag:"Practical 1", title:"Label a real computer setup", brief:"Take a photo of any computer you have access to and label the monitor, CPU, keyboard, mouse and one storage device.", mock:"diagram" } },
+
+    "WD-102": { level:"Beginner", topic:"Formatting documents, tables and mail merge in MS Word.",
+      sections:[
+        {h:"1. The ribbon, styles and templates", body:"The ribbon at the top of Word groups tools by task: Home for text formatting, Insert for images and tables, Layout for margins and spacing. Rather than formatting each heading by hand, Word's built-in Styles (Heading 1, Heading 2, Normal) let you format once and apply everywhere — and they're what generates an automatic table of contents later. Templates give you a ready-made starting structure for common documents like CVs, letters and reports."},
+        {h:"2. Tables that actually communicate", body:"A table is for data that has rows and columns in real life — a timetable, a price list, a result sheet — not for laying out a whole page. Once inserted, you can merge cells for headers, shade alternate rows for readability, and resize columns to fit their content instead of leaving everything the same width by default."},
+        {h:"3. Mail merge", body:"Mail merge lets you produce many personalised documents — certificates, letters, ID cards — from one template and one list of names (usually from Excel). You write the letter once with placeholders like «Name», connect it to your list, and Word generates one finished document per person. This is the single most time-saving Word skill for anyone handling groups of people."}
+      ],
+      mistakes:["Pressing Enter repeatedly to push text down the page instead of using paragraph spacing or a page break.","Manually bolding every heading instead of using the Styles panel, which breaks the moment the design needs to change."],
+      summary:"By the end of this course you should be able to produce a clean, consistently formatted document from scratch, insert and style a table correctly, and merge one template across an entire class list.",
+      keyTerms:["Ribbon","Styles","Template","Mail merge","Table of contents"],
+      practical:{tag:"Practical 2", title:"Design a one-page CV", brief:"Build a one-page CV in Word using headings, a table for your skills, and consistent formatting throughout.", mock:"doc" } },
+
+    "XL-201": { level:"Intermediate", topic:"Formulas, functions and everyday spreadsheet workflows.",
+      sections:[
+        {h:"1. Formulas and core functions", body:"Every formula starts with an equals sign. SUM adds a range of numbers, AVERAGE finds the mean, and IF returns one value when a condition is true and another when it's false — for example, grading a student PASS or FAIL based on their score. These three functions alone cover most everyday spreadsheet needs."},
+        {h:"2. Looking up data with VLOOKUP", body:"VLOOKUP searches down the first column of a table for a value you give it, and returns a matching value from another column — for example, looking up a student's name and pulling back their score from a separate results table. It's the function that turns a spreadsheet from a static list into a searchable database."},
+        {h:"3. Sorting, filtering and pivot tables", body:"Sorting reorders rows by a chosen column; filtering temporarily hides rows that don't match a condition, without deleting anything. Conditional formatting can automatically colour cells red or green based on their value. A pivot table goes further, summarising thousands of rows into a short, readable summary — for instance, total sales per month — in a few clicks."}
+      ],
+      mistakes:["Typing calculated totals in by hand instead of using a formula, so the sheet breaks the moment a score changes.","Copying a formula down a column without checking that its cell references adjusted correctly."],
+      summary:"By the end of this course you should be able to build a spreadsheet that calculates on its own, look up any record instantly, and turn a long list of raw numbers into a short, readable summary.",
+      keyTerms:["SUM","AVERAGE","IF","VLOOKUP","Conditional formatting","Pivot table"],
+      practical:{tag:"Practical 3", title:"Build a class result sheet", brief:"Create a spreadsheet that calculates each student's total, average and grade automatically using formulas.", mock:"sheet" } },
+
+    "PP-102": { level:"Beginner", topic:"Building slide decks that hold attention.",
+      sections:[
+        {h:"1. Layout and theme", body:"A theme sets your colours, fonts and slide layouts consistently across the whole deck, so you're not manually re-styling every slide. Pick one layout per type of content — a title layout for openers, a two-column layout for comparisons — and stay consistent; jumping between random layouts is what makes a deck feel unplanned."},
+        {h:"2. Transitions and animation, used sparingly", body:"A transition is how one slide changes to the next; an animation is how elements move within a single slide. Both are seasoning, not the meal — one simple transition style used consistently reads as more professional than five different flashy ones. Reveal points on a slide one at a time only when the sequence itself matters to understanding."},
+        {h:"3. Presenting data without walls of text", body:"A slide with six bullet points and three sentences each competes with you for the audience's attention instead of supporting you. Cut each slide to one idea, back it with a chart or a single strong image where possible, and say the explanation out loud rather than writing it all on the slide."}
+      ],
+      mistakes:["Writing the full speech onto the slide, then reading it aloud word for word.","Using four different fonts and five colours because the software allows it, not because the brief calls for it."],
+      summary:"By the end of this course you should be able to plan a short deck around one idea per slide, apply a single consistent visual theme, and present it in a way that supports you instead of replacing you.",
+      keyTerms:["Theme","Slide layout","Transition","Animation","Chart"],
+      practical:{tag:"Practical 4", title:"Pitch deck for a small business", brief:"Design a 6-slide pitch deck for a business idea, with one title slide, three content slides, and a closing slide.", mock:"deck" } },
+
+    "CD-201": { level:"Intermediate", topic:"Vector design fundamentals for logos and layouts.",
+      sections:[
+        {h:"1. Shapes, the Bezier tool and paths", body:"Vector graphics are built from mathematical paths, not pixels — which is why a logo drawn in CorelDraw can be resized to a billboard or a business card without losing quality. The Bezier tool draws custom paths point by point, giving you control that basic shape tools can't; most logos are eventually built from a small number of simple shapes combined and adjusted."},
+        {h:"2. Fills, outlines and colour", body:"Every shape has a fill (the colour inside it) and an outline (the colour and thickness of its border) — they can be set independently, or the outline removed entirely for a cleaner look. Working with a genuinely restricted colour palette, often two or three colours, is what makes most professional logos feel deliberate rather than busy."},
+        {h:"3. Exporting for print vs. web", body:"A logo destined for a business card needs to be exported at high resolution in CMYK colour for print; the same logo for a website needs RGB colour and a much smaller file size. Exporting the wrong format for the wrong use is one of the most common beginner mistakes — always ask where the file is going before you export it."}
+      ],
+      mistakes:["Building a logo from a raster image (a photo or a screenshot) instead of real vector shapes, so it blurs the moment it's resized.","Using five or more colours in a first logo concept instead of restricting the palette to two or three."],
+      summary:"By the end of this course you should be able to build a simple logo entirely from vector shapes, keep its colour palette deliberately restrained, and export the right file format for print versus web.",
+      keyTerms:["Vector","Bezier tool","Fill","Outline","CMYK","RGB"],
+      practical:{tag:"Practical 5", title:"Design a logo concept", brief:"Create two logo concepts for a fictional brand of your choice using only shapes, one font family, and two colours.", mock:"logopair" } },
+
+    "IN-101": { level:"Beginner", topic:"Browsers, search and safe use of the web.",
+      sections:[
+        {h:"1. How a browser and search engine work", body:"A browser (Chrome, Edge, Safari) is the program that requests and displays web pages; a search engine (Google, Bing) is just one website the browser can open, whose job is to help you find other websites. Typing a search term into the address bar and pressing Enter usually goes straight to a search engine automatically."},
+        {h:"2. Staying safe online", body:"A padlock icon and 'https' at the start of a web address mean the connection is encrypted — always check for both before entering a password or card details. Be suspicious of links in unexpected emails or messages, and never enter your password on a page you reached by clicking a link rather than typing the address yourself."},
+        {h:"3. Setting up a professional email", body:"A professional email address (ideally some form of your real name) is often the first thing an employer or client sees. Organising your inbox into a small number of folders — rather than leaving everything in one long list — makes it possible to find an important message weeks later instead of scrolling for ten minutes."}
+      ],
+      mistakes:["Using a childhood nickname email address on a CV or job application instead of a professional one.","Entering a password after clicking a link in an unexpected message, instead of typing the site's address directly."],
+      summary:"By the end of this course you should be able to search effectively, tell a secure website from a risky one before entering any details, and run a professional, organised email inbox.",
+      keyTerms:["Browser","Search engine","HTTPS","Padlock icon","Inbox folders"],
+      practical:{tag:"Practical 6", title:"Set up a professional inbox", brief:"Create a professional email address, organise it into three folders, and send yourself a well-formatted test email.", mock:"inbox" } },
+
+    "WEB-201": { level:"Intermediate", topic:"Structuring and styling real web pages.",
+      sections:[
+        {h:"1. Semantic HTML", body:"HTML describes structure, not appearance: a heading is wrapped in a heading tag, a paragraph in a paragraph tag, a group of related content in a section tag. Using the right tag for the right job — rather than styling everything with generic tags — is what 'semantic' HTML means, and it's what allows screen readers and search engines to understand your page correctly."},
+        {h:"2. The CSS box model, flexbox and colour", body:"Every element on a page is a box with content, padding (space inside the border), border, and margin (space outside the border) — understanding this one model explains almost every spacing bug you'll ever hit. Flexbox is a layout mode that arranges boxes in a row or column and distributes space between them automatically, replacing much of the old, fragile ways of positioning elements."},
+        {h:"3. Responsive design", body:"A responsive layout adjusts itself to the screen it's viewed on, from a small phone to a wide monitor, usually using relative units and media queries rather than fixed pixel widths. Since most visitors to any website today are on a phone, designing for the smallest screen first, then expanding, tends to produce a more reliable result than the reverse."}
+      ],
+      mistakes:["Using a heading tag purely to make text look bold, instead of an actual heading in the page's structure.","Setting fixed pixel widths everywhere, so the page breaks the moment it's opened on a smaller phone."],
+      summary:"By the end of this course you should be able to structure a page with proper semantic HTML, style and space it confidently with the box model and flexbox, and make it hold together on any screen size.",
+      keyTerms:["Semantic HTML","Box model","Padding","Flexbox","Media query","Responsive"],
+      practical:{tag:"Practical 7", title:"Build a one-page profile site", brief:"Code a single HTML page about yourself with a styled header, an about section, and a contact section — no frameworks.", mock:"webpreview" } },
+
+    "JS-301": { level:"Advanced", topic:"Programming logic and interactivity on the web.",
+      sections:[
+        {h:"1. Variables, functions and control flow", body:"A variable stores a value you can reuse and update; a function is a named block of code you can run whenever you need it, often with different inputs each time. Control flow — if/else statements and loops — is what lets a program make decisions and repeat actions, rather than running the same fixed steps every single time."},
+        {h:"2. The DOM and events", body:"The DOM (Document Object Model) is JavaScript's live map of everything on the page — every heading, button and image is an object your code can read or change. An event is something that happens (a click, a key press, a page load); listening for events and responding to them is what turns a static page into an interactive one."},
+        {h:"3. Fetching and displaying data", body:"Real applications usually pull data from somewhere else — an API — rather than having it all typed into the page in advance. Fetching that data, then using JavaScript to build and insert new HTML elements from it, is the core pattern behind almost every modern dynamic website, from a weather app to a shopping cart."}
+      ],
+      mistakes:["Trying to update the page directly inside a loop condition instead of storing the result in a variable first.","Forgetting that an event listener needs the element to already exist on the page before it's attached."],
+      summary:"By the end of this course you should be able to write functions with real logic, respond to clicks and other events on a page, and pull in outside data to display dynamically — the three skills behind almost every interactive website.",
+      keyTerms:["Variable","Function","Loop","DOM","Event listener","API"],
+      practical:{tag:"Practical 8", title:"Build a quiz app", brief:"Write a small JavaScript quiz with 5 questions, a score counter, and a result message at the end.", mock:"quizui" } },
+
+    "HK-301": { level:"Advanced", topic:"Vulnerabilities, safe practice and ethical hacking basics.",
+      sections:[
+        {h:"1. Common attack types", body:"Phishing tricks a person into handing over credentials through a fake but convincing message or website. Weak or reused passwords let an attacker who breaches one service walk straight into others. Understanding how an attack actually works — the trick it relies on — is what allows you to recognise and defend against it, rather than just memorising a list of dangers."},
+        {h:"2. Password hygiene and two-factor authentication", body:"A strong password is long and unique to each account, ideally generated and stored by a password manager rather than memorised. Two-factor authentication adds a second, separate proof of identity — usually a code sent to your phone — so a stolen password alone isn't enough for an attacker to get in."},
+        {h:"3. Ethics and the law", body:"Testing security on a system you don't own or don't have explicit written permission to test is illegal in most countries, regardless of intent. Ethical hacking is defined entirely by that permission: the same technical skill is either a paid, respected profession or a criminal offence depending on whether you were authorised to use it."}
+      ],
+      mistakes:["Reusing one strong password across many accounts, so a single breach exposes everything.","Assuming 2FA by SMS text is unnecessary because the password already feels long enough."],
+      summary:"By the end of this course you should be able to recognise common attack techniques, secure your own accounts with strong unique passwords and two-factor authentication, and understand exactly where the legal line sits.",
+      keyTerms:["Phishing","Password manager","Two-factor authentication","Authorisation","Vulnerability"],
+      practical:{tag:"Practical 9", title:"Run a personal security audit", brief:"Check your own accounts for reused passwords, turn on two-factor authentication, and document what you changed.", mock:"checklist" } },
+  };
+
+  function mockHTML(type, course){
+    const barTop = `<div class="mock-bar"><span></span><span></span><span></span></div>`;
+
+    if(type === "diagram"){
+      return `<div class="mock"><div class="mock-bar"><span></span><span></span><span></span><span class="mock-label">annotated-setup.jpg</span></div><div class="mock-body">
+        <div class="mock-diagram">
+          <div class="diag-monitor">
+            <div class="diag-screen"></div>
+            <span class="diag-tag" style="top:-10px; left:8px;">Monitor · output</span>
+          </div>
+          <div class="diag-row">
+            <div class="diag-tower"><span class="diag-tag" style="left:6px;">CPU · processing</span></div>
+            <div class="diag-kb"><span class="diag-tag" style="left:2px;">Keyboard · input</span></div>
+          </div>
+          <div class="diag-row">
+            <div class="diag-mouse"></div><span class="diag-tag">Mouse · input</span>
+            <div class="diag-usb"></div><span class="diag-tag">USB drive · storage</span>
+          </div>
+        </div>
+      </div></div>`;
+    }
+
+    if(type === "sheet"){
+      return `<div class="mock"><div class="mock-bar"><span></span><span></span><span></span><span class="mock-label">class-results.xlsx</span></div><div class="mock-body">
+        <div class="mock-sheet">
+          <div class="h">Name</div><div class="h">Test /30</div><div class="h">Exam /70</div><div class="h">Total</div><div class="h">Grade</div>
+          <div>Amaka O.</div><div>28</div><div>62</div><div>90</div><div class="g-a">A</div>
+          <div>Tunde B.</div><div>21</div><div>55</div><div>76</div><div class="g-b">B</div>
+          <div>Ifeoma K.</div><div>25</div><div>58</div><div>83</div><div class="g-a">A</div>
+          <div>Chuka N.</div><div>17</div><div>39</div><div>56</div><div class="g-c">C</div>
+        </div>
+        <div class="mock-formula">fx&nbsp; =IF(D2&gt;=80,"A",IF(D2&gt;=70,"B","C"))</div>
+      </div></div>`;
+    }
+
+    if(type === "deck"){
+      return `<div class="mock"><div class="mock-bar"><span></span><span></span><span></span><span class="mock-label">pitch-deck.pptx</span></div><div class="mock-body">
+        <div class="mock-slide" style="margin-bottom:10px;"><h5>${course}</h5><p>A better way to shop your street</p></div>
+        <div class="deck-strip">
+          <div class="deck-thumb"><span>1</span>Title</div>
+          <div class="deck-thumb"><span>2</span>Problem</div>
+          <div class="deck-thumb"><span>3</span>Solution</div>
+          <div class="deck-thumb"><span>4</span>Market</div>
+          <div class="deck-thumb"><span>5</span>Pricing</div>
+          <div class="deck-thumb"><span>6</span>Thank you</div>
+        </div>
+      </div></div>`;
+    }
+
+    if(type === "logopair"){
+      return `<div class="mock"><div class="mock-bar"><span></span><span></span><span></span><span class="mock-label">logo-concepts.cdr</span></div><div class="mock-body">
+        <div class="logo-pair">
+          <div class="logo-box">
+            <div class="shape" style="width:52%;height:52%;left:24%;top:14%;background:var(--gold);border-radius:8px;"></div>
+            <div class="shape" style="width:34%;height:34%;left:33%;bottom:12%;background:var(--navy);border-radius:50%;"></div>
+            <span class="logo-caption">Concept A</span>
+          </div>
+          <div class="logo-box">
+            <div class="shape" style="width:60%;height:22%;left:20%;top:20%;background:var(--cyan);border-radius:100px;"></div>
+            <div class="shape" style="width:60%;height:22%;left:20%;bottom:20%;background:var(--navy);border-radius:100px;"></div>
+            <span class="logo-caption">Concept B</span>
+          </div>
+        </div>
+      </div></div>`;
+    }
+
+    if(type === "inbox"){
+      return `<div class="mock"><div class="mock-browser-bar"><span></span><div class="mock-url">🔒 mail.a3brainstorm.app/inbox</div></div><div class="mock-body">
+        <div class="inbox-mock">
+          <div class="inbox-sidebar">
+            <div class="inbox-folder active">Inbox <span>3</span></div>
+            <div class="inbox-folder">Coursework</div>
+            <div class="inbox-folder">Receipts</div>
+          </div>
+          <div class="inbox-list">
+            <div class="inbox-item"><strong>A3 Brain Storm</strong><span>Welcome to your new inbox</span></div>
+            <div class="inbox-item"><strong>Trainer</strong><span>Practical 6 — reminder</span></div>
+            <div class="inbox-item"><strong>A3 Brain Storm</strong><span>Certificate ready for download</span></div>
+          </div>
+        </div>
+      </div></div>`;
+    }
+
+    if(type === "webpreview"){
+      return `<div class="mock"><div class="mock-browser-bar"><span></span><div class="mock-url">📄 index.html</div></div><div class="mock-body">
+        <div class="mock-code" style="margin-bottom:12px;">&lt;<span class="tag">section</span> <span class="attr">class</span>=<span class="str">"about"</span>&gt;<br>&nbsp;&nbsp;&lt;<span class="tag">h2</span>&gt;About me&lt;/<span class="tag">h2</span>&gt;<br>&nbsp;&nbsp;&lt;<span class="tag">p</span>&gt;Trainee at A3 Brain Storm&lt;/<span class="tag">p</span>&gt;<br>&lt;/<span class="tag">section</span>&gt;</div>
+        <div class="web-preview">
+          <div class="web-preview-header">Chidera Okafor</div>
+          <div class="web-preview-sub">Frontend Trainee · Lagos</div>
+          <div class="web-preview-tags"><span>HTML</span><span>CSS</span><span>Contact</span></div>
+        </div>
+      </div></div>`;
+    }
+
+    if(type === "quizui"){
+      return `<div class="mock"><div class="mock-bar"><span></span><span></span><span></span><span class="mock-label">quiz-app.js — preview</span></div><div class="mock-body">
+        <div class="quiz-ui">
+          <div class="quiz-progress">Question 3 of 5 · Score: 2</div>
+          <div class="quiz-q">Which symbol starts a JavaScript comment?</div>
+          <div class="quiz-opt-mini sel">// (double slash)</div>
+          <div class="quiz-opt-mini">## (double hash)</div>
+          <div class="quiz-opt-mini">&lt;!-- --&gt;</div>
+        </div>
+      </div></div>`;
+    }
+
+    if(type === "checklist"){
+      return `<div class="mock"><div class="mock-bar"><span></span><span></span><span></span><span class="mock-label">security-audit.md</span></div><div class="mock-body">
+        <div class="checklist">
+          <div class="check-row done"><span class="check-mark">✓</span> Unique password on every account</div>
+          <div class="check-row done"><span class="check-mark">✓</span> Two-factor authentication enabled</div>
+          <div class="check-row"><span class="check-mark">○</span> Old reused password on 1 account — pending</div>
+        </div>
+      </div></div>`;
+    }
+
+    if(type === "doc"){
+      return `<div class="mock"><div class="mock-bar"><span></span><span></span><span></span><span class="mock-label">my-cv.docx</span></div><div class="mock-body">
+        <div class="cv-mock">
+          <div class="cv-header">CHIDERA OKAFOR<span>Frontend Trainee · Lagos, Nigeria</span></div>
+          <div class="cv-cols">
+            <div>
+              <div class="cv-label">Skills</div>
+              <div class="cv-table"><div>MS Word</div><div>Advanced</div><div>HTML/CSS</div><div>Intermediate</div></div>
+            </div>
+            <div>
+              <div class="cv-label">Experience</div>
+              <p class="cv-text">A3 Brain Storm — Trainee<br>Jan 2026 – Present</p>
+            </div>
+          </div>
+        </div>
+      </div></div>`;
+    }
+
+    return `<div class="mock"><div class="mock-bar"><span></span><span></span><span></span></div><div class="mock-body">
+      <div class="mock-term">$ whoami<br>trainee<br>$ status --practical<br>submitted: true</div>
+    </div></div>`;
+  }
+
+  function openReading(code, name){
+    const c = courseData[code];
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-reading').classList.add('active');
+    document.getElementById('topbarTitle').textContent = name;
+    closeSidebar();
+
+    const p = c.practical;
+    document.getElementById('readingBody').innerHTML = `
+      <span class="lock-tag">🔒 Protected content — signed-in access only</span>
+      <h2>${name}</h2>
+      <div class="reading-meta">${c.level} · Full handout · ${c.sections.length} sections</div>
+      <div class="reading-block">
+        <p>${c.topic}</p>
+      </div>
+      <div class="outline-card">
+        <span class="outline-label">Course breakdown</span>
+        ${c.sections.map((s,i) => `<div class="outline-row"><span class="outline-num">${i+1}</span>${s.h.replace(/^\d+\.\s*/,'')}</div>`).join("")}
+        <div class="outline-row"><span class="outline-num">${c.sections.length+1}</span>Common mistakes to avoid</div>
+        <div class="outline-row"><span class="outline-num">${c.sections.length+2}</span>Practical: ${c.practical.title}</div>
+      </div>
+      ${c.sections.map(s => `
+        <div class="reading-block">
+          <h3>${s.h}</h3>
+          <p>${s.body}</p>
+        </div>
+      `).join("")}
+      <div class="reading-block">
+        <h3>Common mistakes to avoid</h3>
+        <ul>${c.mistakes.map(m => `<li>${m}</li>`).join("")}</ul>
+      </div>
+      <div class="reading-block">
+        <h3>In summary</h3>
+        <p>${c.summary}</p>
+      </div>
+      <div class="key-terms">${c.keyTerms.map(t => `<span class="key-term">${t}</span>`).join("")}</div>
+      <div class="practical-card" style="margin-top:22px;">
+        <div class="practical-head">
+          <span class="ptag">${p.tag}</span>
+          <h4>${p.title}</h4>
+          <p>${p.brief}</p>
+        </div>
+        ${mockHTML(p.mock, name)}
+      </div>
+      <button class="btn-quiz" onclick="document.querySelector('[data-view=view-quiz]').click()">Take the ${name} quiz</button>
+    `;
+  }
+
+  function buildWatermark(){
+    const layer = document.getElementById('watermarkLayer');
+    let html = "";
+    const label = (typeof studentName !== 'undefined' ? studentName : "Student").toUpperCase();
+    for(let i=0;i<24;i++){ html += `<span>${label} · A3-2026-0417<br>${new Date().toLocaleDateString()}</span>`; }
+    layer.innerHTML = html;
+  }
+
+  /* ---------- Exam tabs ---------- */
+  function startExam(){
+    document.getElementById('startGate').style.display = 'none';
+    document.getElementById('examContent').style.display = 'block';
+    if(window.examTimer) window.examTimer.startFresh();
+  }
+  function switchExamTab(which){
+    document.getElementById('tabObjective').classList.toggle('active', which==='objective');
+    document.getElementById('tabTheory').classList.toggle('active', which==='theory');
+    document.getElementById('objectiveBlock').style.display = which==='objective' ? 'block':'none';
+    document.getElementById('theoryBlock').style.display = which==='theory' ? 'block':'none';
+  }
+  function selectOpt(el){
+    el.parentElement.querySelectorAll('.q-opt').forEach(o => o.classList.remove('sel'));
+    el.classList.add('sel');
+    objAnswered.add(objQ);
+  }
+  let objQ = 1, theoQ = 1;
+  const objAnswered = new Set();
+  const theoAnswered = new Set();
+  function objStep(dir){
+    objQ = Math.min(60, Math.max(1, objQ + dir));
+    document.getElementById('objCount').textContent = `Question ${objQ} of 60`;
+    document.getElementById('objProgress').style.width = (objQ/60*100)+'%';
+    document.querySelectorAll('#objOptions .q-opt').forEach(o => o.classList.remove('sel'));
+    if(objAnswered.has(objQ)){
+      // demo only: re-selecting state isn't stored per-question in this prototype
+    }
+  }
+  function theoStep(dir){
+    theoQ = Math.min(20, Math.max(1, theoQ + dir));
+    document.getElementById('theoCount').textContent = `Question ${theoQ} of 20`;
+    document.getElementById('theoProgress').style.width = (theoQ/20*100)+'%';
+  }
+  function updateWordCount(el){
+    const words = el.value.trim().split(/\s+/).filter(Boolean).length;
+    document.getElementById('wordCount').textContent = words + " words";
+    if(words > 0) theoAnswered.add(theoQ);
+    else theoAnswered.delete(theoQ);
+  }
+
+  /* ---------- Exam scoring: 60 objective + 20 theory, marked out of 100 ---------- */
+  function finishExam(){
+    // Objective section is worth 60 of the 100 marks (1 mark per question),
+    // Theory section is worth 40 of the 100 marks (2 marks per question).
+    const objMarks = objAnswered.size * 1;
+    const theoMarks = theoAnswered.size * 2;
+    const total = Math.min(100, objMarks + theoMarks);
+
+    let band, bandClass;
+    if(total <= 50){ band = "FAIL"; bandClass = "fail"; }
+    else if(total <= 70){ band = "PASS"; bandClass = "pass"; }
+    else { band = "EXCELLENT"; bandClass = "excellent"; }
+
+    document.getElementById('resultScore').innerHTML = total + "<span>/100</span>";
+    const bandEl = document.getElementById('resultBand');
+    bandEl.textContent = band;
+    bandEl.className = "result-band " + bandClass;
+    document.getElementById('resultBreakdown').innerHTML =
+      `Objective: ${objAnswered.size}/60 answered · ${objMarks} marks<br>Theory: ${theoAnswered.size}/20 answered · ${theoMarks} marks`;
+    document.getElementById('resultCard').classList.add('show');
+    document.getElementById('resultCard').scrollIntoView({behavior:'smooth', block:'center'});
+    if(window.examTimer) window.examTimer.hide();
+  }
+  function closeResult(){
+    document.getElementById('resultCard').classList.remove('show');
+  }
+
+  /* ---------- PalmPay receipt upload ---------- */
+  function copyAcc(){
+    const acc = document.getElementById('palmAcc').textContent;
+    if(navigator.clipboard){ navigator.clipboard.writeText(acc).catch(()=>{}); }
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = "Copied"; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove('copied'); }, 1600);
+  }
+  function selectPlan(el){
+    document.querySelectorAll('.plan-opt').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    selectedPlanAmount = parseInt(el.dataset.plan, 10);
+  }
+  let receiptAttached = false;
+  function handlePassport(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const box = document.getElementById('passportBox');
+      box.classList.add('filled');
+      document.getElementById('passportIcon').style.display = 'none';
+      document.getElementById('passportText').innerHTML = file.name;
+      const img = document.getElementById('passportPreview');
+      img.src = ev.target.result;
+      img.style.display = 'block';
+      // Also use it as the avatar image once inside the app
+      document.querySelectorAll('.avatar').forEach(a => {
+        a.style.backgroundImage = `url(${ev.target.result})`;
+        a.style.backgroundSize = 'cover';
+        a.style.backgroundPosition = 'center';
+        a.textContent = '';
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+  function handleReceipt(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const box = document.getElementById('uploadBox');
+      box.classList.add('filled');
+      document.getElementById('uploadIcon').style.display = 'none';
+      document.getElementById('uploadText').innerHTML = file.name;
+      const img = document.getElementById('uploadPreview');
+      img.src = ev.target.result;
+      img.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+    receiptAttached = true;
+    document.getElementById('submitReceiptBtn').disabled = false;
+  }
+  /* ---------- Enrolled students list (auto-updates once payment is submitted) ---------- */
+  const enrolledStudents = [
+    { name:"Tunde Balogun", plan:10000, date:"Aug 12, 2026" },
+    { name:"Ifeoma Kalu", plan:5000, date:"Aug 13, 2026" },
+  ];
+  let selectedPlanAmount = 5000;
+
+  function renderStudentList(){
+    const wrap = document.getElementById('studentList');
+    if(!wrap) return;
+    if(enrolledStudents.length === 0){
+      wrap.innerHTML = `<div class="student-empty">No students have paid yet.</div>`;
+      return;
+    }
+    wrap.innerHTML = enrolledStudents.map(s => {
+      const initials = s.name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join("");
+      const planLabel = s.plan === 10000 ? "Full access · ₦10,000" : "Partial · ₦5,000";
+      return `<div class="student-row">
+        <div class="savatar">${initials}</div>
+        <div class="sbody"><h4>${s.name}</h4><span>${planLabel} · ${s.date}</span></div>
+        <span class="student-badge">Paid ✓</span>
+      </div>`;
+    }).join("");
+  }
+  renderStudentList();
+
+  function submitReceipt(){
+    if(!receiptAttached) return;
+    document.getElementById('submitReceiptBtn').disabled = true;
+    document.getElementById('submitReceiptBtn').textContent = "Receipt submitted ✓";
+    document.getElementById('verifyNote').textContent = "Payment received — your access has been unlocked.";
+
+    // Reflect the payment automatically: add to the enrolled students list,
+    // update this student's own dashboard and the payment status banner.
+    const nameEl = document.getElementById('payerNameInput');
+    const name = (nameEl && nameEl.value.trim()) || studentName || "Student";
+    const today = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    enrolledStudents.unshift({ name, plan: selectedPlanAmount, date: today });
+    renderStudentList();
+
+    const isFull = selectedPlanAmount === 10000;
+    const banner = document.getElementById('payStatusBanner');
+    banner.innerHTML = isFull
+      ? `<span class="dot" style="background:var(--cyan);"></span> Access: Full plan · fully paid, nothing outstanding`
+      : `<span class="dot"></span> Access: Partial plan · ₦5,000 paid, ₦5,000 balance remaining`;
+
+    document.getElementById('dashEyebrow').textContent = "Payment confirmed";
+    document.getElementById('dashHeadline').textContent = isFull ? "Full access unlocked" : "Partial access unlocked";
+    document.getElementById('dashSub').textContent = isFull
+      ? "Every course, quiz and exam is now available to you."
+      : "You're in — clear the remaining ₦5,000 balance any time to avoid an access pause.";
+  }
+
+  /* ---------- Copy / screenshot deterrents (best-effort — see note) ---------- */
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('copy', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
+    if((e.ctrlKey||e.metaKey) && ['c','p','s','u'].includes(e.key.toLowerCase())){ e.preventDefault(); }
+  });
+  window.addEventListener('beforeprint', () => { document.getElementById('blurGuard').classList.add('show'); });
+  document.addEventListener('visibilitychange', () => {
+    document.getElementById('blurGuard').classList.toggle('show', document.hidden);
+  });
+  window.addEventListener('blur', () => document.getElementById('blurGuard').classList.add('show'));
+  window.addEventListener('focus', () => document.getElementById('blurGuard').classList.remove('show'));
+
+  /* ---------- PWA: register service worker for install + offline ---------- */
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(() => {
+        // Registration fails silently if not served over https/localhost — expected when opened as a local file.
+      });
+    });
+  }
+</script>
+</body>
+</html>
